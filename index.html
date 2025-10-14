@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS生成</title>
+    <link rel="stylesheet" href="style.css?v=3.1">
+</head>
+<body>
+    <div class="gradio-container">
+        <!-- 头部 -->
+        <div class="gradio-header">
+            <h1>TTS生成</h1>
+            <span class="version-badge">v2.0.0</span>
+        </div>
+
+        <!-- 主要内容区 -->
+        <div class="gradio-blocks">
+            <!-- 配置区 -->
+            <div class="gradio-row config-row">
+                <div class="gradio-column">
+                    <label class="gradio-label">🔑 API 密钥</label>
+                    <input type="password" class="gradio-input" id="api-key-input" 
+                           placeholder="输入您的API密钥（sk-...）">
+                </div>
+                <div class="gradio-column">
+                    <label class="gradio-label">🤖 模型选择</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select class="gradio-dropdown" id="model-select">
+                            <option value="">请先刷新获取模型列表</option>
+                        </select>
+                        <button class="gradio-button secondary-button" id="refresh-models-btn">🔄</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 音色选择模式 -->
+            <div class="gradio-row">
+                <div class="gradio-column">
+                    <label class="gradio-label">🎵 音色模式</label>
+                    <select class="gradio-dropdown" id="voice-mode-select">
+                        <option value="system">系统预置音色</option>
+                        <option value="upload">上传自定义音色</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 系统预置音色选择 -->
+            <div class="gradio-row" id="system-voice-row">
+                <div class="gradio-column">
+                    <label class="gradio-label">🎙️ 系统音色</label>
+                    <select class="gradio-dropdown" id="system-voice-select">
+                        <option value="FunAudioLLM/CosyVoice2-0.5B:alex">Alex (英文男声)</option>
+                        <option value="FunAudioLLM/CosyVoice2-0.5B:luna">Luna (英文女声)</option>
+                        <option value="FunAudioLLM/CosyVoice2-0.5B:echo">Echo (中性音色)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 输入输出区 -->
+            <div class="gradio-row main-row">
+                <!-- 左侧：输入 -->
+                <div class="gradio-column input-column">
+                    <div class="gradio-box">
+                        <label class="gradio-label">📝 输入文本</label>
+                        <textarea class="gradio-textbox" id="text-input" 
+                                  placeholder="请输入您想要转换为语音的文本...&#10;&#10;例如：你能用高兴的情感说吗？<|endofprompt|>今天真是太开心了，马上要放假了！" 
+                                  rows="8"></textarea>
+                    </div>
+
+                    <!-- 用户上传音色区（默认隐藏） -->
+                    <div class="gradio-box" id="upload-voice-box" style="display: none;">
+                        <label class="gradio-label">🎙️ 上传音色音频</label>
+                        <div class="file-upload-area" id="voice-upload-area">
+                            <input type="file" id="voice-audio-upload" accept="audio/*" style="display: none;">
+                            <div class="upload-content">
+                                <div class="upload-icon">📁</div>
+                                <div class="upload-text">点击或拖拽音频文件到此处</div>
+                                <div class="upload-hint">支持 MP3, WAV, M4A 等格式</div>
+                            </div>
+                            <div class="file-info" id="voice-file-info" style="display: none;">
+                                <span class="file-icon">🎵</span>
+                                <span class="file-name" id="voice-file-name"></span>
+                                <button class="remove-file-btn" id="remove-voice-btn">✕</button>
+                            </div>
+                        </div>
+                        <input type="text" class="gradio-input" id="reference-text-input" 
+                               placeholder="参考音频的文字内容（用于音色克隆）" 
+                               style="margin-top: 12px;">
+                    </div>
+
+                    <button class="gradio-button primary-button" id="synthesize-btn">
+                        🎵 生成语音
+                    </button>
+                </div>
+
+                <!-- 右侧：输出 -->
+                <div class="gradio-column output-column">
+                    <div class="gradio-box">
+                        <label class="gradio-label">🔊 生成结果</label>
+                        <div class="audio-output-area" id="audio-output">
+                            <audio controls class="gradio-audio" id="audio-player" style="display: none;"></audio>
+                            <div class="audio-placeholder" id="audio-placeholder">
+                                <div class="placeholder-icon">🎧</div>
+                                <div class="placeholder-text">音频将在此处生成</div>
+                                <div class="placeholder-hint">填写配置信息后点击"生成语音"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="gradio-footer">
+            <p>Powered by SiliconFlow TTS API</p>
+        </div>
+    </div>
+    <script src="script.js?v=3.1"></script>
+</body>
+</html>
