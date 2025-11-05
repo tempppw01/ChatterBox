@@ -1,4 +1,10 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+    // === 常量配置 ===
+    const MAX_TEXT_LENGTH = 500;
+    const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+    const MAX_HISTORY_ITEMS = 50;
+    
     // === UI 元素 ===
     const synthesizeBtn = document.getElementById('synthesize-btn');
     const audioPlayer = document.getElementById('audio-player');
@@ -7,6 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelSelect = document.getElementById('model-select');
     const refreshModelsBtn = document.getElementById('refresh-models-btn');
     const apiKeyInput = document.getElementById('api-key-input');
+    
+    // 语音速度控制
+    const speedSelect = document.getElementById('speed-select');
     
     // 音色模式选择
     const voiceModeSelect = document.getElementById('voice-mode-select');
@@ -22,8 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const voiceFileName = document.getElementById('voice-file-name');
     const removeVoiceBtn = document.getElementById('remove-voice-btn');
     
+    // 历史记录相关元素
+    const historyToggleBtn = document.getElementById('history-toggle-btn');
+    const historyPanel = document.getElementById('history-panel');
+    const historyCloseBtn = document.getElementById('history-close-btn');
+    const historyContent = document.getElementById('history-content');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    
     let selectedVoiceFile = null;
     let uploadedVoiceUri = null;
+    let currentAudioUrl = null;
+    let historyList = [];
+
+    // === 初始化 ===
+    loadHistory();
+    renderHistory();
 
     // === 音色模式切换 ===
     voiceModeSelect.addEventListener('change', () => {
@@ -75,6 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleFileSelect(file) {
         if (file) {
+            // 检查文件大小
+            if (file.size > MAX_FILE_SIZE) {
+                showError(`文件大小不能超过 ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+                return;
+            }
+            
             selectedVoiceFile = file;
             uploadedVoiceUri = null;
             voiceFileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -214,6 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 检查文本长度
+        if (text.length > MAX_TEXT_LENGTH) {
+            showError(`文本长度不能超过 ${MAX_TEXT_LENGTH} 字`);
+            return;
+        }
+
         // 根据音色模式验证
         if (voiceMode === 'upload') {
             if (!selectedVoiceFile) {
@@ -235,36 +269,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 确定音色ID
             if (voiceMode === 'system') {
-                // 使用系统预置音色
                 voiceId = systemVoiceSelect.value;
                 console.log('🎵 使用系统音色:', voiceId);
-                
-                audioPlaceholder.innerHTML = `
-                    <div class="placeholder-icon">⏳</div>
-                    <div class="placeholder-text">正在生成语音...</div>
-                    <div class="placeholder-hint">模型: ${model} | 音色: 系统预置</div>
-                `;
+                updatePlaceholder('⏳', '正在生成语音...', `模型: ${model} | 音色: 系统预置`);
             } else {
-                // 使用用户上传音色
                 if (!uploadedVoiceUri) {
-                    audioPlaceholder.innerHTML = `
-                        <div class="placeholder-icon">📤</div>
-                        <div class="placeholder-text">正在上传音色文件...</div>
-                        <div class="placeholder-hint">文件: ${selectedVoiceFile.name}</div>
-                    `;
-                    
+                    updatePlaceholder('📤', '正在上传音色文件...', `文件: ${selectedVoiceFile.name}`);
                     const referenceText = referenceTextInput.value.trim() || '这是一段参考音频';
                     uploadedVoiceUri = await uploadVoice(apiKey, model, selectedVoiceFile, referenceText);
                     console.log('🎵 获得音色ID:', uploadedVoiceUri);
                 }
-                
                 voiceId = uploadedVoiceUri;
-                
-                audioPlaceholder.innerHTML = `
-                    <div class="placeholder-icon">⏳</div>
-                    <div class="placeholder-text">正在生成语音...</div>
-                    <div class="placeholder-hint">模型: ${model} | 音色: 自定义</div>
-                `;
+                updatePlaceholder('⏳', '正在生成语音...', `模型: ${model} | 音色: 自定义`);
             }
 
             // 生成语音
@@ -298,23 +314,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const audioBlob = await response.blob();
             console.log('✅ 音频生成成功，大小:', (audioBlob.size / 1024).toFixed(2), 'KB');
             
-            const audioUrl = URL.createObjectURL(audioBlob);
+            // 清理旧的 Blob URL
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+            
+            currentAudioUrl = URL.createObjectURL(audioBlob);
 
-            audioPlayer.src = audioUrl;
+            // 应用语音速度
+            const speed = parseFloat(speedSelect.value);
+            audioPlayer.playbackRate = speed;
+            audioPlayer.src = currentAudioUrl;
             audioPlayer.style.display = 'block';
             audioPlaceholder.style.display = 'none';
+
+            // 添加到历史记录
+            addToHistory({
+                text: text,
+                model: model,
+                voiceMode: voiceMode === 'system' ? '系统预置' : '自定义',
+                speed: speed,
+                audioUrl: currentAudioUrl,
+                timestamp: new Date().toISOString()
+            });
 
             showSuccess('语音生成成功！');
 
         } catch (error) {
             console.error('❌ 错误:', error);
-            
-            audioPlaceholder.innerHTML = `
-                <div class="placeholder-icon" style="color: #DC2626;">❌</div>
-                <div class="placeholder-text" style="color: #DC2626;">生成失败</div>
-                <div class="placeholder-hint">${error.message}</div>
-            `;
-            
+            updatePlaceholder('❌', '生成失败', error.message, '#DC2626');
             showError(`生成失败: ${error.message}`);
             
             if (error.message.includes('上传')) {
@@ -326,6 +354,114 @@ document.addEventListener('DOMContentLoaded', () => {
             synthesizeBtn.disabled = false;
         }
     }
+
+    // === 辅助函数：更新占位符 ===
+    function updatePlaceholder(icon, text, hint, color = '') {
+        const colorStyle = color ? `style="color: ${color};"` : '';
+        audioPlaceholder.innerHTML = `
+            <div class="placeholder-icon" ${colorStyle}>${icon}</div>
+            <div class="placeholder-text" ${colorStyle}>${text}</div>
+            <div class="placeholder-hint">${hint}</div>
+        `;
+    }
+
+    // === 历史记录功能 ===
+    historyToggleBtn.addEventListener('click', () => {
+        historyPanel.classList.add('active');
+    });
+
+    historyCloseBtn.addEventListener('click', () => {
+        historyPanel.classList.remove('active');
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+        if (confirm('确定要清空所有历史记录吗？')) {
+            historyList = [];
+            saveHistory();
+            renderHistory();
+            showSuccess('历史记录已清空');
+        }
+    });
+
+    function addToHistory(item) {
+        historyList.unshift(item);
+        if (historyList.length > MAX_HISTORY_ITEMS) {
+            historyList = historyList.slice(0, MAX_HISTORY_ITEMS);
+        }
+        saveHistory();
+        renderHistory();
+    }
+
+    function loadHistory() {
+        const saved = localStorage.getItem('tts_history');
+        if (saved) {
+            try {
+                historyList = JSON.parse(saved);
+            } catch (e) {
+                console.error('加载历史记录失败:', e);
+                historyList = [];
+            }
+        }
+    }
+
+    function saveHistory() {
+        localStorage.setItem('tts_history', JSON.stringify(historyList));
+    
+    }
+
+    function renderHistory() {
+        if (historyList.length === 0) {
+            historyContent.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+            return;
+        }
+
+        historyContent.innerHTML = historyList.map((item, index) => {
+            const date = new Date(item.timestamp);
+            const timeStr = date.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            return `
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <span class="history-item-time">${timeStr}</span>
+                        <div class="history-item-actions">
+                            <button class="history-item-btn" onclick="window.replayHistory(${index})">▶️</button>
+                            <button class="history-item-btn" onclick="window.deleteHistory(${index})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="history-item-text">${item.text}</div>
+                    <div class="history-item-info">
+                        <span>模型: ${item.model.split('/').pop()}</span>
+                        <span>音色: ${item.voiceMode}</span>
+                        <span>速度: ${item.speed}x</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 全局函数供历史记录按钮调用
+    window.replayHistory = (index) => {
+        const item = historyList[index];
+        if (item && item.audioUrl) {
+            audioPlayer.src = item.audioUrl;
+            audioPlayer.playbackRate = item.speed;
+            audioPlayer.style.display = 'block';
+            audioPlaceholder.style.display = 'none';
+            audioPlayer.play();
+            historyPanel.classList.remove('active');
+        }
+    };
+
+    window.deleteHistory = (index) => {
+        historyList.splice(index, 1);
+        saveHistory();
+        renderHistory();
+    };
 
     function showError(message) {
         alert('❌ ' + message);
@@ -352,11 +488,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('tts_system_voice', systemVoiceSelect.value);
     });
 
+    speedSelect.addEventListener('change', () => {
+        localStorage.setItem('tts_speed', speedSelect.value);
+    });
+
     // === 恢复保存的配置 ===
     const savedKey = localStorage.getItem('tts_api_key');
     const savedModel = localStorage.getItem('tts_model');
     const savedVoiceMode = localStorage.getItem('tts_voice_mode');
     const savedSystemVoice = localStorage.getItem('tts_system_voice');
+    const savedSpeed = localStorage.getItem('tts_speed');
 
     if (savedKey) apiKeyInput.value = savedKey;
     if (savedModel) modelSelect.value = savedModel;
@@ -365,4 +506,5 @@ document.addEventListener('DOMContentLoaded', () => {
         voiceModeSelect.dispatchEvent(new Event('change'));
     }
     if (savedSystemVoice) systemVoiceSelect.value = savedSystemVoice;
+    if (savedSpeed) speedSelect.value = savedSpeed;
 });

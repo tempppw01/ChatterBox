@@ -11,7 +11,7 @@
         <!-- 头部 -->
         <div class="gradio-header">
             <h1>TTS生成</h1>
-            <span class="version-badge">v2.0.0</span>
+            <span class="version-badge">v0.01beta</span>
         </div>
 
         <!-- 主要内容区 -->
@@ -31,6 +31,21 @@
                         </select>
                         <button class="gradio-button secondary-button" id="refresh-models-btn">🔄</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- 语音速度控制 -->
+            <div class="gradio-row">
+                <div class="gradio-column">
+                    <label class="gradio-label">⚡ 语音速度</label>
+                    <select class="gradio-dropdown" id="speed-select">
+                        <option value="0.5">0.5x (很慢)</option>
+                        <option value="0.75">0.75x (慢)</option>
+                        <option value="1.0" selected>1.0x (正常)</option>
+                        <option value="1.25">1.25x (快)</option>
+                        <option value="1.5">1.5x (很快)</option>
+                        <option value="2.0">2.0x (极快)</option>
+                    </select>
                 </div>
             </div>
 
@@ -111,9 +126,28 @@
             </div>
         </div>
 
+        <!-- 历史记录按钮 -->
+        <button class="history-toggle-btn" id="history-toggle-btn" title="历史记录">
+            📜
+        </button>
+
+        <!-- 历史记录面板 -->
+        <div class="history-panel" id="history-panel">
+            <div class="history-header">
+                <h3>📜 历史记录</h3>
+                <button class="history-close-btn" id="history-close-btn">✕</button>
+            </div>
+            <div class="history-content" id="history-content">
+                <div class="history-empty">暂无历史记录</div>
+            </div>
+            <div class="history-footer">
+                <button class="gradio-button secondary-button" id="clear-history-btn">清空历史</button>
+            </div>
+        </div>
+
         <!-- 页脚 -->
         <div class="gradio-footer">
-            <p>Powered by SiliconFlow TTS API</p>
+            <p>Powered by SiliconFlow TTS API | v0.01beta</p>
         </div>
     </div>
     <script src="script.js?v=3.1"></script>
