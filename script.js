@@ -505,6 +505,11 @@ document.addEventListener('DOMContentLoaded', () => {
         voiceModeSelect.value = savedVoiceMode;
         voiceModeSelect.dispatchEvent(new Event('change'));
     }
-    if (savedSystemVoice) systemVoiceSelect.value = savedSystemVoice;
+    if (savedSystemVoice) {
+        // 确保保存的值仍然有效
+        if (Array.from(systemVoiceSelect.options).some(opt => opt.value === savedSystemVoice)) {
+            systemVoiceSelect.value = savedSystemVoice;
+        }
+    }
     if (savedSpeed) speedSelect.value = savedSpeed;
 });
