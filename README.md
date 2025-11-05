@@ -2,15 +2,11 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.01beta-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![Version](https://img.shields.io/badge/version-0.01beta-blue.svg)![License](https://img.shields.io/badge/license-MIT-green.svg)![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 
 一个基于 SiliconFlow API 的现代化文本转语音 Web 应用
 
-[在线演示](#) | [功能特性](#功能特性) | [快速开始](#快速开始) | [使用指南](#使用指南)
+[立即使用](http://yuyin.shuaihong.online/)
 
 </div>
 
@@ -26,7 +22,7 @@ TTS生成器是一个简洁、优雅的文本转语音Web应用，采用Gradio�
 - 🎵 **双音色模式** - 支持系统预置音色和自定义音色上传
 - ⚡ **语音速度控制** - 6档速度调节（0.5x - 2.0x）
 - 📜 **历史记录** - 自动保存生成记录，支持快速回放
-- � **动态模型加载** - 从API实时获取最新TTS模型列表
+- 🔄 **动态模型加载** - 从API实时获取最新TTS模型列表
 - 💾 **配置自动保存** - 浏览器本地存储，下次访问自动恢复
 - 📱 **响应式设计** - 完美适配桌面和移动设备
 - 🔒 **安全可靠** - 所有请求通过HTTPS，API密钥安全存储
@@ -367,7 +363,7 @@ Body: {
 
 ## 📝 更新日志
 
-### v0.01beta (2024-11-05)
+### v0.01beta (2025-11-05)
 - ⚡ 新增语音速度控制（6档调节）
 - 📜 新增历史记录功能（最多50条）
 - 📏 添加文本长度限制（500字）
@@ -385,7 +381,7 @@ Body: {
 - 💾 配置自动保存
 - 🐛 修复多个已知问题
 
-### v1.0.0 (初始版本)
+### v1.0.0 (2024-08-20)
 - 🎉 项目初始发布
 - ✨ 基础TTS功能
 - 🎨 简洁UI设计
@@ -409,12 +405,14 @@ Body: {
 ## 📞 联系方式
 
 - 项目主页: [https://github.com/yourusername/tts-generator](https://github.com/yourusername/tts-generator)
-- 问题反馈: [Issues](https://github.com/yourusername/tts-generator/issues)
+- 问题反馈: [https://github.com/yourusername/tts-generator/issues](https://github.com/yourusername/tts-generator/issues)
 - 邮箱: your.email@example.com
 
 ---
 
 <div align="center">
+
+![应用截图](https://youke1.picui.cn/s1/2025/11/05/690ac470b9315.png)
 
 **如果觉得这个项目对您有帮助，请给个 ⭐️ Star 支持一下！**
 
